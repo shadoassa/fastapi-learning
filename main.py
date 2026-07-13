@@ -1,20 +1,28 @@
-from typing import Annotated, Literal
-from fastapi import FastAPI, Query
-from pydantic import BaseModel, Field
+from datetime import datetime, time, timedelta
+from typing import Annotated
+from uuid import UUID
+
+from fastapi import Body, FastAPI
 
 app = FastAPI()
 
-# クエリパラメータモデル (BaseModelで作成)
-class FilterParams(BaseModel):
-    #余分なクエリパラメータを受け取るとエラーにする設定
-    model_config = {"extra": "forbid"} 
-
-    limit: int = Field(100, gt=0, le=100)
-    offset: int = Field(0, ge=0)
-    order_by: Literal["created_at", "updated_at"] = "created_at"
-    tags: list[str] = []
-
-
-@app.get("/items/")
-async def read_items(filter_query: Annotated[FilterParams, Query()]):
-    return filter_query
+# 様々な追加の型ヒントを使った例.
+@app.put("/items/{item_id}")
+async def read_items(
+    item_id: UUID,
+    start_datetime: Annotated[datetime, Body()],
+    end_datetime: Annotated[datetime, Body()],
+    process_after: Annotated[timedelta, Body()],
+    repeat_at: Annotated[time | None, Body()] = None,
+):
+    start_process = start_datetime + process_after
+    duration = end_datetime - start_process
+    return {
+        "item_id": item_id,
+        "start_datetime": start_datetime,
+        "end_datetime": end_datetime,
+        "process_after": process_after,
+        "repeat_at": repeat_at,
+        "start_process": start_process,
+        "duration": duration,
+    }

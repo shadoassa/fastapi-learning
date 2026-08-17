@@ -5,3 +5,5 @@ venv/
 .env
 *.egg-info/
 .python-version
+
+.dockerenv/

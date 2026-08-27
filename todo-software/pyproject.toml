@@ -11,7 +11,27 @@ dependencies = [
     "uvicorn[standard] (>=0.52.3,<0.53.0)"
 ]
 
+[tool.poetry]
+# アプリケーション用途で配布パッケージ化しないため、package-modeを無効化
+package-mode = false
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "ruff (>=0.16.4,<0.17.0)",
+    "httpx (>=0.28.1,<0.29.0)"
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

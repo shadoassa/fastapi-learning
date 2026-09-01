@@ -46,3 +46,48 @@ def test_list_todos_after_create():
     assert response.status_code == 200
     titles = [t["title"] for t in response.json()]
     assert titles == ["一件目", "二件目"]
+
+
+def test_get_todo():
+    created = client.post("/todos", json={"title": "牛乳を買う"}).json()
+    response = client.get(f"/todos/{created['id']}")
+    assert response.status_code == 200
+    assert response.json() == created
+
+
+def test_get_todo_not_found():
+    response = client.get("/todos/999")
+    assert response.status_code == 404
+
+
+def test_update_todo():
+    created = client.post("/todos", json={"title": "牛乳を買う"}).json()
+    response = client.put(f"/todos/{created['id']}", json={"done": True})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["title"] == "牛乳を買う"
+    assert body["done"] is True
+
+
+def test_update_todo_title():
+    created = client.post("/todos", json={"title": "牛乳を買う"}).json()
+    response = client.put(f"/todos/{created['id']}", json={"title": "パンを買う"})
+    assert response.status_code == 200
+    assert response.json()["title"] == "パンを買う"
+
+
+def test_update_todo_not_found():
+    response = client.put("/todos/999", json={"done": True})
+    assert response.status_code == 404
+
+
+def test_delete_todo():
+    created = client.post("/todos", json={"title": "牛乳を買う"}).json()
+    response = client.delete(f"/todos/{created['id']}")
+    assert response.status_code == 204
+    assert client.get(f"/todos/{created['id']}").status_code == 404
+
+
+def test_delete_todo_not_found():
+    response = client.delete("/todos/999")
+    assert response.status_code == 404

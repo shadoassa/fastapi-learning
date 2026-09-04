@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -31,8 +31,18 @@ async def hello() -> dict[str, str]:
 
 
 @app.get("/todos")
-async def list_todos() -> list[Todo]:
-    return todos_db
+async def list_todos(
+    done: bool | None = None,
+    limit: int | None = Query(default=None, ge=0),
+    offset: int = Query(default=0, ge=0),
+) -> list[Todo]:
+    result = todos_db
+    if done is not None:
+        result = [todo for todo in result if todo.done == done]
+    result = result[offset:]
+    if limit is not None:
+        result = result[:limit]
+    return result
 
 
 @app.post("/todos", status_code=201)
